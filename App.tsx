@@ -1,45 +1,72 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React from 'react';
+import { StatusBar } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+import { createNativeBottomTabNavigator } from '@react-navigation/bottom-tabs/unstable';
+import { createStaticNavigation } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { BottomSheetProvider } from '@swmansion/react-native-bottom-sheet';
 
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+import { CountryScreen } from './src/CountryScreen';
+import { SHEET_TAB_COUNT } from './src/config';
 
-  return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
-  );
-}
+const FeedHome = () => (
+  <CountryScreen title="Feed" withSheet={SHEET_TAB_COUNT > 0} />
+);
+const TicketsHome = () => (
+  <CountryScreen title="Tickets" withSheet={SHEET_TAB_COUNT > 1} />
+);
+const ChatsHome = () => (
+  <CountryScreen title="Chats" withSheet={SHEET_TAB_COUNT > 2} />
+);
+const ProfileHome = () => (
+  <CountryScreen title="Profile" withSheet={SHEET_TAB_COUNT > 3} />
+);
 
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
+const stackOptions = { headerShown: false };
 
-  return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
-    </View>
-  );
-}
+const FeedStack = createNativeStackNavigator({
+  screenOptions: stackOptions,
+  screens: { FeedHome },
+});
+const TicketsStack = createNativeStackNavigator({
+  screenOptions: stackOptions,
+  screens: { TicketsHome },
+});
+const ChatsStack = createNativeStackNavigator({
+  screenOptions: stackOptions,
+  screens: { ChatsHome },
+});
+const ProfileStack = createNativeStackNavigator({
+  screenOptions: stackOptions,
+  screens: { ProfileHome },
+});
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+const Tabs = createNativeBottomTabNavigator({
+  screenOptions: {
+    headerShown: false,
+    tabBarLabelVisibilityMode: 'labeled',
+    tabBarActiveTintColor: '#FFD600',
+    tabBarInactiveTintColor: '#8A8A8A',
+    tabBarStyle: { backgroundColor: '#1B1E22' },
+  },
+  screens: {
+    Feed: { screen: FeedStack, options: { title: 'Feed' } },
+    Tickets: { screen: TicketsStack, options: { title: 'Tickets' } },
+    Chats: { screen: ChatsStack, options: { title: 'Chats' } },
+    Profile: { screen: ProfileStack, options: { title: 'Profile' } },
   },
 });
 
-export default App;
+const Navigation = createStaticNavigation(Tabs);
+
+export default function App() {
+  return (
+    <SafeAreaProvider>
+      <StatusBar barStyle="light-content" />
+      <BottomSheetProvider>
+        <Navigation />
+      </BottomSheetProvider>
+    </SafeAreaProvider>
+  );
+}
